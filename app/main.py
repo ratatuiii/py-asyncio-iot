@@ -10,7 +10,7 @@ async def main() -> None:
     # create an IOT service
     service = IOTService()
 
-    # create and register a few devices
+    # create devices
     hue_light = HueLightDevice()
     speaker = SmartSpeakerDevice()
     toilet = SmartToiletDevice()
@@ -21,8 +21,8 @@ async def main() -> None:
         service.register_device(toilet),
     )
 
-
-    wake_up_program = run_parallel(
+    print("wakeup start")
+    await run_parallel(
         service.send_msg(Message(hue_light_id, MessageType.SWITCH_ON)),
         run_sequence(
             service.send_msg(Message(speaker_id, MessageType.SWITCH_ON)),
@@ -35,8 +35,10 @@ async def main() -> None:
             ),
         ),
     )
+    print("wakeup end")
 
-    sleep_program = run_parallel(
+    print("sleep start")
+    await run_parallel(
         service.send_msg(Message(hue_light_id, MessageType.SWITCH_OFF)),
         service.send_msg(Message(speaker_id, MessageType.SWITCH_OFF)),
         run_sequence(
@@ -44,13 +46,6 @@ async def main() -> None:
             service.send_msg(Message(toilet_id, MessageType.CLEAN)),
         ),
     )
-
-    print("wakeup start")
-    await wake_up_program
-    print("wakeup end")
-
-    print("sleep start")
-    await sleep_program
     print("sleep end")
 
 
